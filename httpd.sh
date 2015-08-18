@@ -120,7 +120,8 @@ function http::respond_file() {
             linux_sendfile rc $fd $readfd $NULL ${stunp[st_size]##*:}
             # XXX ignore rc
         elif [ "$PLATFORM" = "FreeBSD" ]; then
-            errx $EX_OSERR "todo"
+            freebsd_sendfile rc $readfd $fd 0  ${stunp[st_size]##*:} $NULL $NULL 0
+            # XXX ignore rc
         fi
         close rc $readfd
         # XXX ignore rc

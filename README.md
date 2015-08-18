@@ -17,3 +17,9 @@ httpd.sh: Listening on :8888...
 
 (It serves files accessible from the current working directory.  Note that it
 is trivial to escape the document root unless you run it in a jail or chroot.)
+
+Platforms
+=========
+
+httpd.sh runs on Linux and FreeBSD using mostly POSIX-standard C APIs (sendfile
+excepted).
