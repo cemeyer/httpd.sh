@@ -35,6 +35,9 @@ RESP200ALEN=$( echo -ne "$RESP200A" | wc -c )
 trap "echo $'\nGot ^C, exiting'" SIGINT
 trap "" SIGPIPE
 
+declare -i CONNS=0
+declare -i FSENT=0
+
 function http::respond_bogus() {
     local -i fd=$1
     local wr
@@ -121,6 +124,11 @@ function http::respond_file() {
         fi
         close rc $readfd
         # XXX ignore rc
+
+        FSENT=$((FSENT+1))
+        if [ $((FSENT % 100)) -eq 0 ]; then
+            printf $'%d files served (%d connected)\n' $FSENT $CONNS
+        fi
     else
         dlcall -g printf $'(404) \'%s\' is not a file\n' pointer:$file
         http::respond_file_not_found $fd
@@ -197,6 +205,11 @@ function connection::new() {
     conns[$fd,buf]=$buf
     conns[$fd,buf_pos]=0
     conns[$fd,buf_len]=$DFLT_BUFSZ
+
+    CONNS=$((CONNS+1))
+    if [ $((CONNS % 100)) -eq 0 ]; then
+        printf $'%d clients connected\n' $CONNS
+    fi
 }
 
 function connection::more() {
@@ -239,6 +252,8 @@ function connection::close() {
     local -n c_conns=$1
     local -i fd=$2
     local rc
+
+    CONNS=$((CONNS-1))
 
     free c_conns[$fd,buf]
     close rc $fd
