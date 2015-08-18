@@ -32,6 +32,9 @@ RESP404LEN=$( echo -ne "$RESP404" | wc -c )
 RESP200LEN=$( echo -ne "$RESP200" | wc -c )
 RESP200ALEN=$( echo -ne "$RESP200A" | wc -c )
 
+trap "echo $'\nGot ^C, exiting'" SIGINT
+trap "" SIGPIPE
+
 function http::respond_bogus() {
     local -i fd=$1
     local wr
