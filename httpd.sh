@@ -24,14 +24,13 @@ source unistd.sh
 DFLT_BUFSZ=8192
 
 RESP400=$'HTTP/1.0 400 Bad Request\r\n\r\n<html><body><h1>400 Bad Request</h1></body></html>'
+RESP404=$'HTTP/1.0 404 File Not Found\r\n\r\n<html><body><h1>404 File Not Found</h1></body></html>'
 RESP200=$'HTTP/1.0 200 OK\r\nContent-type'
 RESP200A=$' text/plain\r\n\r\n'
 RESP400LEN=$( echo -ne "$RESP400" | wc -c )
+RESP404LEN=$( echo -ne "$RESP404" | wc -c )
 RESP200LEN=$( echo -ne "$RESP200" | wc -c )
 RESP200ALEN=$( echo -ne "$RESP200A" | wc -c )
-#RESP400=''
-#malloc RESP400 $RESP400LEN
-#memcpy $RESP400 "$_RESP400" $RESP400LEN
 
 function http::respond_bogus() {
     local -i fd=$1
@@ -39,6 +38,18 @@ function http::respond_bogus() {
     local rc
 
     send wr $fd "$RESP400" $RESP400LEN 0
+    # XXX ignore wr
+
+    shutdown rc $fd $SHUT_RDWR
+    # XXX ignore rc
+}
+
+function http::respond_file_not_found() {
+    local -i fd=$1
+    local wr
+    local rc
+
+    send wr $fd "$RESP404" $RESP404LEN 0
     # XXX ignore wr
 
     shutdown rc $fd $SHUT_RDWR
@@ -74,8 +85,7 @@ function http::respond_file() {
     fi
     if [ ${rc##*:} -lt 0 ]; then
         warn "stat"
-        # XXX 404
-        http::respond_bogus $fd
+        http::respond_file_not_found $fd
         free $sb
         return
     fi
@@ -109,16 +119,11 @@ function http::respond_file() {
         close rc $readfd
         # XXX ignore rc
     else
-        # XXX 404?
-        echo -n "XXX 400'ing non-file: "
-        dlcall -g printf $'\'%s\'\n' pointer:$file
-        http::respond_bogus $fd
+        dlcall -g printf $'(404) \'%s\' is not a file\n' pointer:$file
+        http::respond_file_not_found $fd
         free $sb
         return
     fi
-
-    #send wr $fd $RESP400 $RESP400LEN 0
-    # XXX ignore wr
 
     free $sb
 
