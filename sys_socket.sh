@@ -10,9 +10,13 @@ declare -ri SHUT_RDWR=2
 if [ "$PLATFORM" = FreeBSD ]; then
     declare -ri SOL_SOCKET=0xffff
     declare -ri SO_REUSEADDR=4
+
+    declare -ri SOCK_NONBLOCK=0x20000000
 elif [ "$PLATFORM" = Linux ]; then
     declare -ri SOL_SOCKET=1
     declare -ri SO_REUSEADDR=2
+
+    declare -ri SOCK_NONBLOCK=0x800
 fi
 
 function accept() {

@@ -306,12 +306,19 @@ function main_loop() {
 
         unpack $fds_rd fds_unpacked
         if FD_ISSET fds_unpacked $lfd; then
-            accept rc $lfd $NULL $NULL
-            if [ ${rc##*:} -lt 0 ]; then
-                err $EX_OSERR "accept"
-            fi
+            while true; do
+                accept rc $lfd $NULL $NULL
 
-            connection::new connections ${rc##*:}
+                if [ ${rc##*:} -lt 0 ]; then
+                    # accept may produce EWOULDBLOCK / EAGAIN, or ECONNABORTED;
+                    # none of these are show-stoppers.  Since ctypes.sh
+                    # programs can't access errno yet, just ignore all errors.
+                    #err $EX_OSERR "accept"
+                    break
+                fi
+
+                connection::new connections ${rc##*:}
+            done
         fi
 
         for key in "${!connections[@]}"; do
@@ -356,6 +363,7 @@ function bind_port() {
     local onp
     local addr_info
     local ai_hints
+    local stype
 
     rc=0
     a_one=( int:1 )
@@ -386,7 +394,9 @@ function bind_port() {
     select_ai ai_hints $addr_info
     unpack $ai_hints bind_addr_info
 
-    socket lfd ${bind_addr_info[ai_family]##*:} ${bind_addr_info[ai_socktype]##*:} ${bind_addr_info[ai_protocol]##*:}
+    stype=${bind_addr_info[ai_socktype]##*:}
+    stype=$((stype | SOCK_NONBLOCK))
+    socket lfd ${bind_addr_info[ai_family]##*:} $stype ${bind_addr_info[ai_protocol]##*:}
     lfd=${lfd##*:}
     if [ $lfd -lt 0 ]; then
         err $EX_OSERR "socket(2) $lfd"
