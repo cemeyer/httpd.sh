@@ -305,6 +305,15 @@ function main_loop() {
         fi
 
         unpack $fds_rd fds_unpacked
+        for key in "${!connections[@]}"; do
+            case "$key" in *,fd)
+                cfd=${connections[$key]}
+                if FD_ISSET fds_unpacked $cfd; then
+                    connection::more connections $cfd
+                fi
+            esac
+        done
+
         if FD_ISSET fds_unpacked $lfd; then
             while true; do
                 accept rc $lfd $NULL $NULL
@@ -320,15 +329,6 @@ function main_loop() {
                 connection::new connections ${rc##*:}
             done
         fi
-
-        for key in "${!connections[@]}"; do
-            case "$key" in *,fd)
-                cfd=${connections[$key]}
-                if FD_ISSET fds_unpacked $cfd; then
-                    connection::more connections $cfd
-                fi
-            esac
-        done
     done
 }
 
