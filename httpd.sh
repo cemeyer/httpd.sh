@@ -24,9 +24,11 @@ source unistd.sh
 DFLT_BUFSZ=8192
 
 RESP400=$'HTTP/1.0 400 Bad Request\r\n\r\n<html><body><h1>400 Bad Request</h1></body></html>'
-RESP200=$'HTTP/1.0 200 OK\r\n\r\n'
+RESP200=$'HTTP/1.0 200 OK\r\nContent-type'
+RESP200A=$' text/plain\r\n\r\n'
 RESP400LEN=$( echo -ne "$RESP400" | wc -c )
 RESP200LEN=$( echo -ne "$RESP200" | wc -c )
+RESP200ALEN=$( echo -ne "$RESP200A" | wc -c )
 #RESP400=''
 #malloc RESP400 $RESP400LEN
 #memcpy $RESP400 "$_RESP400" $RESP400LEN
@@ -90,6 +92,13 @@ function http::respond_file() {
             free $sb
             return
         fi
+
+        send wr $fd "$RESP200" $RESP200LEN 0
+        # XXX ignore wr
+        send wr $fd "string::" 1 0
+        # XXX ignore wr
+        send wr $fd "$RESP200A" $RESP200ALEN 0
+        # XXX ignore wr
 
         if [ "$PLATFORM" = "Linux" ]; then
             linux_sendfile rc $fd $readfd $NULL ${stunp[st_size]##*:}
