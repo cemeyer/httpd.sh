@@ -30,25 +30,25 @@ function getaddrinfo() {
     local rc
     local -a ptr_ptr=(pointer)
 
-    dlcall -g -r pointer malloc $SIZEOF_PTR
+    dlcall -r pointer malloc $SIZEOF_PTR
     tmp_ptr=$DLRETVAL
     
-    dlcall -g -r int getaddrinfo $2 $3 $4 $tmp_ptr
+    dlcall -r int getaddrinfo $2 $3 $4 $tmp_ptr
     rc=$DLRETVAL
     if [ $rc = "int:0" ]; then
         unpack $tmp_ptr ptr_ptr
         eval $5=\$ptr_ptr
     fi
 
-    dlcall -g free $tmp_ptr
+    dlcall free $tmp_ptr
     eval $1=\$rc
 }
 
 function freeaddrinfo() {
-    dlcall -g freeaddrinfo "$1"
+    dlcall freeaddrinfo "$1"
 }
 
 function gai_strerror() {
-    dlcall -g -r pointer gai_strerror "$2"
+    dlcall -r pointer gai_strerror "$2"
     eval $1=\$DLRETVAL
 }

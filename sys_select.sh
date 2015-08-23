@@ -41,6 +41,6 @@ function FD_ZERO() {
 }
 
 function so_select() {
-    dlcall -g -r int select $2 $3 $4 $5 $6
+    dlcall -r int select $2 $3 $4 $5 $6
     eval $1=\$DLRETVAL
 }

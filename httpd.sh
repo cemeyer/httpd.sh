@@ -131,7 +131,7 @@ function http::respond_file() {
             printf $'%d files served (%d connected)\n' $FSENT $CONNS
         fi
     else
-        dlcall -g printf $'(404) \'%s\' is not a file\n' pointer:$file
+        dlcall printf $'(404) \'%s\' is not a file\n' pointer:$file
         http::respond_file_not_found $fd
         free $sb
         return
@@ -183,7 +183,7 @@ function http::parse_and_respond() {
     memset $path 0 $((pathlen + 1))
     memcpy $path pointer:$buf $pathlen
 
-    #dlcall -g printf $'Got request for \'%s\'\n' $path
+    #dlcall printf $'Got request for \'%s\'\n' $path
     http::respond_file $fd $path
 
     free $path
