@@ -1,19 +1,19 @@
 function err() {
     local -i code=$1
     shift
-    dlcall -g err int:$code "$@"
+    dlcall err int:$code "$@"
 }
 
 function errx() {
     local -i code=$1
     shift
-    dlcall -g errx int:$code "$@"
+    dlcall errx int:$code "$@"
 }
 
 function warn() {
-    dlcall -g warn "$@"
+    dlcall warn "$@"
 }
 
 function warnx() {
-    dlcall -g warnx "$@"
+    dlcall warnx "$@"
 }

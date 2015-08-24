@@ -64,20 +64,20 @@ function S_ISREG() {
 }
 
 function fstat() {
-    dlcall -g -r int fstat int:$2 $3
+    dlcall -r int fstat int:$2 $3
     eval $1=\$DLRETVAL
 }
 
 function lstat() {
-    dlcall -g -r int lstat $2 $3
+    dlcall -r int lstat $2 $3
     eval $1=\$DLRETVAL
 }
 
 function stat() {
     if [ "$PLATFORM" = "Linux" ]; then
-        dlcall -g -r int __xstat 0 $2 $3
+        dlcall -r int __xstat 0 $2 $3
     elif [ "$PLATFORM" = "FreeBSD" ]; then
-        dlcall -g -r int stat $2 $3
+        dlcall -r int stat $2 $3
     fi
     eval $1=\$DLRETVAL
 }
